@@ -19,10 +19,8 @@ function generateRandomTemperature() {
     const minTemperature = 16;
     const maxTemperature = 38;
 
-    // Generate a random number between 0 and 1
     const random = Math.random();
 
-    // Scale and shift the random number to fit the desired range
     const temperature = Math.floor(random * (maxTemperature - minTemperature + 1)) + minTemperature;
 
     return temperature;

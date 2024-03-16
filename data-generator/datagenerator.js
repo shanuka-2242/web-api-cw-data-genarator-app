@@ -43,24 +43,34 @@ mongoose.connect('mongodb+srv://root:root@webapi.fgpmolr.mongodb.net/web-api-pro
 })
 
 //Insert data using function which runs every 5 minutes
-setInterval(createOrUpdateWeatherInfo, 60 * 1000);
+setInterval(createOrUpdateWeatherInfo, 5 * 60 * 1000);
 
 async function createOrUpdateWeatherInfo(){
     try {
         districtList.forEach(async district => {
+            const now = new Date();
+            const formattedDate = now.toLocaleString('en-US', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: true
+            });
+
             const splittedStrings = district.split('|');
-            
             const IsAvailableWeatherInfo = await WeatherInfoModel.findOne({districtId: splittedStrings[0]});
 
             if(IsAvailableWeatherInfo){
-                console.log("Weather info available under district ID " + IsAvailableWeatherInfo.districtId);
+                console.log(formattedDate.replace(',', '') + " : " + "Weather info available under district ID " + IsAvailableWeatherInfo.districtId);
                 
                 IsAvailableWeatherInfo.temprature = generateRandomTemperature() + "°C";
                 IsAvailableWeatherInfo.humidity = generateRandomHumidity() + "%";
                 IsAvailableWeatherInfo.airpressure = generateRandomAirPressure() + "hPa";
                 await IsAvailableWeatherInfo.save();
                 
-                console.log(IsAvailableWeatherInfo.districtId + ", " + IsAvailableWeatherInfo.districtName + " district info updated.");
+                console.log(formattedDate.replace(',', '') + " : " + IsAvailableWeatherInfo.districtId + ", " + IsAvailableWeatherInfo.districtName + " district info updated.");
             }
             else{
                 
@@ -79,6 +89,7 @@ async function createOrUpdateWeatherInfo(){
                 console.log(splittedStrings[0] + ", " + splittedStrings[1] + " district info newly added.");
             }    
         });
+        console.error('___________________________________________________');
     } catch (error) {
         console.error('Error inserting data:', error.message);
     }

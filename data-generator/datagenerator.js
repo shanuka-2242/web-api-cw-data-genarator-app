@@ -1,41 +1,89 @@
 const express = require('express')
 const mongoose = require('mongoose')
 const app = express()
+const WeatherInfoModel = require('./models/weatherDataModel')
 app.use(express.json())
+
+//District static info list
+let districtList = [
+    "A01|Ampara|81.6643|7.2965",
+    "A02|Anuradhapura|80.3822|8.3114",
+    "B03|Badulla|81.0587|6.9924",
+    "B04|Batticaloa|81.6983|7.7355",
+    "C05|Colombo|79.8612|6.9271",
+    "G06|Galle|80.2170|6.0535",
+    "G07|Gampaha|79.9930|7.0873",
+    "H08|Hambantota|81.1185|6.1240",
+    "J09|Jaffna|80.0055|9.6612",
+    "K10|Kalutara|79.9647|6.5794",
+    "K11|Kandy|80.6350|7.2906",
+    "K12|Kegalle|80.3466|7.2525",
+    "K13|Kilinochchi|80.4000|9.3833",
+    "K14|Kurunegala|80.3659|7.4860",
+    "M15|Mannar|79.8455|8.9764",
+    "M16|Matale|80.6248|7.4675",
+    "M17|Matara|80.5353|5.9545",
+    "M18|Monaragala|81.0060|6.8871",
+    "M19|Mullaitivu|80.7174|9.2677",
+    "N20|Nuwara Eliya|80.7821|6.9497",
+    "P21|Polonnaruwa|81.0055|7.9403",
+    "P22|Puttalam|79.8287|8.0390",
+    "R23|Ratnapura|80.4747|6.7055",
+    "T24|Trincomalee|81.2152|8.5879",
+    "V25|Vavuniya|80.4971|8.7544"
+]
 
 //DB Connect
 mongoose.connect('mongodb+srv://root:root@webapi.fgpmolr.mongodb.net/web-api-project?retryWrites=true&w=majority&appName=WEBAPI')
 .then(() => {
     console.log('connected to MongoDB')
+    console.log(generateRandomTemperature())
     app.listen(8000, () => {console.log("Server started on port 8000");})
 }).catch((error) => {
     console.log(error)
 })
 
-let districtList = [
-    "Ampara|A001",
-    "Badulla|B001"
-]
+//Insert data using function which runs every 5 minutes
+setInterval(createOrUpdateWeatherInfo, 60 * 1000);
 
-//Insert data
-app.post('/insertData', (req, res) => {
+async function createOrUpdateWeatherInfo(){
+    try {
+        districtList.forEach(async district => {
+            const splittedStrings = district.split('|');
+            
+            const IsAvailableWeatherInfo = await WeatherInfoModel.findOne({districtId: splittedStrings[0]});
 
-    //const districtId = "";
-    //const districtName = "";
-
-    //Looping trough district list
-    districtList.forEach(district => {
-        const splittedStrings = district.split('|');
-        //districtId = splittedStrings[0]
-        //districtName = splittedStrings[1]
-    
-        console.log(splittedStrings + Date.now);
-    });
-
-    console.log("inside post function");
-    console.log(req.body);
-    res.send(req.body)
-})
+            if(IsAvailableWeatherInfo){
+                console.log("Weather info available under district ID " + IsAvailableWeatherInfo.districtId);
+                
+                IsAvailableWeatherInfo.temprature = generateRandomTemperature() + "°C";
+                IsAvailableWeatherInfo.humidity = generateRandomHumidity() + "%";
+                IsAvailableWeatherInfo.airpressure = generateRandomAirPressure() + "hPa";
+                await IsAvailableWeatherInfo.save();
+                
+                console.log(IsAvailableWeatherInfo.districtId + ", " + IsAvailableWeatherInfo.districtName + " district info updated.");
+            }
+            else{
+                
+                const newWeatherInfo = new WeatherInfoModel({           
+                    
+                    districtId: splittedStrings[0],
+                    districtName: splittedStrings[1],
+                    longtude: splittedStrings[2],
+                    latitude: splittedStrings[3],
+                    temprature: generateRandomTemperature() + "°C",
+                    humidity: generateRandomHumidity() + "%",
+                    airpressure: generateRandomAirPressure() + "hPa"
+                
+                });
+                await newWeatherInfo.save();
+                console.log(splittedStrings[0] + ", " + splittedStrings[1] + " district info newly added.");
+            }    
+        });
+    } catch (error) {
+        console.error('Error inserting data:', error.message);
+    }
+}
 
 function generateRandomTemperature() {
     const minTemperature = 16;
@@ -55,4 +103,14 @@ function generateRandomHumidity() {
     const humidity = Math.floor(random * (maxHumidity - minHumidity + 1)) + minHumidity ;
 
     return humidity;
+}
+
+function generateRandomAirPressure() {
+    const minAirPressure = 990;
+    const maxAirPressure = 1020;
+
+    const random = Math.random();
+    const airPressure = Math.floor(random * (maxAirPressure - minAirPressure + 1)) + minAirPressure ;
+
+    return airPressure;
 }

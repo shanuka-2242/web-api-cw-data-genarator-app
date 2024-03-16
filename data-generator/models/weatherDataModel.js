@@ -21,9 +21,8 @@ const weatherInfoSchema = mongoose.Schema(
         humidity: {
             type: String
         },
-        airpresure: {
+        airpressure: {
             type: String,
-            default: "29.3 in Hg"
         },
     },
     {
@@ -31,6 +30,6 @@ const weatherInfoSchema = mongoose.Schema(
     }
 )
 
-const WeatherInfo = mongoose.model('WeatherInfo', weatherInfoSchema);
+const WeatherInfoModel = mongoose.model('WeatherInfo', weatherInfoSchema);
 
-module.exports = WeatherInfo;
+module.exports = WeatherInfoModel;

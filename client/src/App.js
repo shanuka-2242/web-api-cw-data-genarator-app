@@ -1,37 +1,88 @@
-import React, { useState, useEffect } from 'react';
-import L from 'leaflet';
+// import './App.css'
+// import { useEffect } from 'react';
+// function App() {
 
+//     async function fetchData() {
+//         try {
+//             const res = await fetch('http://localhost:5000/weatherInfo')
+//             const data = res.json();
+//             return data;
+//         }
+//         catch(err){
+//             console.log(err)
+//         }
+//     } 
+//     useEffect( () => {
+//         console.log(fetchData())
+//     }, [])
+// }
+// export default App
+
+import React, { useState, useEffect } from 'react';
+import { MapContainer, TileLayer, Marker, Tooltip } from 'react-leaflet';
+import { Icon } from 'leaflet'
+import './App.css';
 import 'leaflet/dist/leaflet.css';
 
-const MapComponent = ({ longitude, latitude }) => {
-    const [map, setMap] = useState(null);
+function SriLankaMap() {
+  const [weatherInfo, setWeatherInfo] = useState([]);
+  const customIcon = new Icon ({
+    iconUrl: require("./img/marker.png"),
+    iconSize: [35, 35]
+  });
 
-    useEffect(() => {
-        // Initialize map when component mounts
-        const initializeMap = () => {
-            const newMap = L.map('map').setView([latitude, longitude], 13); // Center the map using provided longitude and latitude
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(newMap);
-            setMap(newMap);
-        };
+  useEffect(() => {
+    const apiUrl = 'https://web-api-cw-server-app.onrender.com/weatherInfo';
 
-        if (!map) initializeMap();
-    }, [map, longitude, latitude]);
-
-    useEffect(() => {
-        // Add marker when longitude or latitude changes
-        if (map && longitude !== null && latitude !== null) {
-            L.marker([latitude, longitude]).addTo(map)
-                .bindPopup('Location')
-                .openPopup();
+    fetch(apiUrl)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
         }
-    }, [map, longitude, latitude]);
+        return response.json();
+      })
+      .then(data => {
+        const watherInformation = data;
+        setWeatherInfo(watherInformation);
+      })
+      .catch(error => {
+        console.error('There was a problem with the fetch operation:', error);
+      });
+  }, []);
+  return (
+    <MapContainer center={[7.8731, 80.7718]} zoom={8}>
+      <TileLayer
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      />
+      {weatherInfo.map(weatherinfo => (
+        <Marker key={weatherinfo.districtId} position={[weatherinfo.latitude, weatherinfo.longtude]} icon = {customIcon}>
+          <Tooltip permanent>
+            <span>
+              <strong>{weatherinfo.districtName}</strong><br/>
+              Temprature: <strong>{weatherinfo.temprature}</strong><br/>
+              Humidity: <strong>{weatherinfo.humidity}</strong><br/>
+              Air Pressure: <strong>{weatherinfo.airpressure}</strong>
+            </span>
+          </Tooltip>
+        </Marker>
+      ))}
+    </MapContainer>
+  );
+}
 
-    return (
-        <div>
-            {/* Div to hold the map */}
-            <div id="map" style={{ height: '400px', width: '100%' }}></div>
-        </div>
-    );
-};
+export default SriLankaMap;
 
-export default MapComponent;
+// {
+//     "_id": "65f5e6bbd35a23f2c92ba5aa",
+//     "districtId": "A01",
+//     "districtName": "Ampara",
+//     "longtude": "81.6643",
+//     "latitude": "7.2965",
+//     "temprature": "27°C",
+//     "humidity": "62%",
+//     "airpressure": "1019hPa",
+//     "createdAt": "2024-03-16T18:36:43.436Z",
+//     "updatedAt": "2024-03-16T20:38:22.975Z",
+//     "__v": 0
+// },

@@ -18,17 +18,20 @@
 // }
 // export default App
 
+import './App.css';
+import 'leaflet/dist/leaflet.css';
 import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Tooltip } from 'react-leaflet';
 import { Icon } from 'leaflet'
-import './App.css';
-import 'leaflet/dist/leaflet.css';
+import { MarkerClusterGroup } from 'react-leaflet-cluster';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faThermometerHalf, faTint, faWind } from '@fortawesome/free-solid-svg-icons'; 
 
 function SriLankaMap() {
   const [weatherInfo, setWeatherInfo] = useState([]);
   const customIcon = new Icon ({
     iconUrl: require("./img/marker.png"),
-    iconSize: [35, 35]
+    iconSize: [26, 26]
   });
 
   useEffect(() => {
@@ -53,20 +56,21 @@ function SriLankaMap() {
     <MapContainer center={[7.8731, 80.7718]} zoom={8}>
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"/>
+      {/* <MarkerClusterGroup> */}
       {weatherInfo.map(weatherinfo => (
         <Marker key={weatherinfo.districtId} position={[weatherinfo.latitude, weatherinfo.longtude]} icon = {customIcon}>
           <Tooltip permanent>
             <span>
               <strong>{weatherinfo.districtName}</strong><br/>
-              Temprature: <strong>{weatherinfo.temprature}</strong><br/>
-              Humidity: <strong>{weatherinfo.humidity}</strong><br/>
-              Air Pressure: <strong>{weatherinfo.airpressure}</strong>
+              <FontAwesomeIcon icon={faThermometerHalf} /> Temperature: <strong>{weatherinfo.temprature}</strong><br/>
+              <FontAwesomeIcon icon={faTint} /> Humidity: <strong>{weatherinfo.humidity}</strong><br/>
+              <FontAwesomeIcon icon={faWind} /> Air Pressure: <strong>{weatherinfo.airpressure}</strong>
             </span>
           </Tooltip>
         </Marker>
       ))}
+      {/* </MarkerClusterGroup> */}
     </MapContainer>
   );
 }

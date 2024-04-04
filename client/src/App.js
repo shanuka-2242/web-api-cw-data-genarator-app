@@ -1,29 +1,8 @@
-// import './App.css'
-// import { useEffect } from 'react';
-// function App() {
-
-//     async function fetchData() {
-//         try {
-//             const res = await fetch('http://localhost:5000/weatherInfo')
-//             const data = res.json();
-//             return data;
-//         }
-//         catch(err){
-//             console.log(err)
-//         }
-//     } 
-//     useEffect( () => {
-//         console.log(fetchData())
-//     }, [])
-// }
-// export default App
-
 import './App.css';
 import 'leaflet/dist/leaflet.css';
 import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Tooltip } from 'react-leaflet';
 import { Icon } from 'leaflet'
-import { MarkerClusterGroup } from 'react-leaflet-cluster';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faThermometerHalf, faTint, faWind } from '@fortawesome/free-solid-svg-icons'; 
 
@@ -51,13 +30,12 @@ function SriLankaMap() {
       .catch(error => {
         console.error('There was a problem with the fetch operation:', error);
       });
-  }, []);
+  });
   return (
     <MapContainer center={[7.8731, 80.7718]} zoom={8}>
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"/>
-      {/* <MarkerClusterGroup> */}
       {weatherInfo.map(weatherinfo => (
         <Marker key={weatherinfo.districtId} position={[weatherinfo.latitude, weatherinfo.longtude]} icon = {customIcon}>
           <Tooltip permanent>
@@ -70,13 +48,13 @@ function SriLankaMap() {
           </Tooltip>
         </Marker>
       ))}
-      {/* </MarkerClusterGroup> */}
     </MapContainer>
   );
 }
 
 export default SriLankaMap;
 
+//JSON Template
 // {
 //     "_id": "65f5e6bbd35a23f2c92ba5aa",
 //     "districtId": "A01",

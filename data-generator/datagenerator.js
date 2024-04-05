@@ -37,13 +37,13 @@ let districtList = [
 mongoose.connect('mongodb+srv://root:root@webapi.fgpmolr.mongodb.net/web-api-project?retryWrites=true&w=majority&appName=WEBAPI')
     .then(() => {
         console.log('connected to MongoDB')
-        app.listen(1000, () => { console.log("Server started on port 1000"); })
+        app.listen(5000, () => { console.log("Server started on port 5000"); })
     }).catch((error) => {
         console.log(error)
     })
 
 //Insert data using function which runs every 5 minutes
-setInterval(createOrUpdateWeatherInfo, 5 * 1 * 1000);
+setInterval(createOrUpdateWeatherInfo, 5 * 60 * 1000);
 
 async function createOrUpdateWeatherInfo() {
     try {

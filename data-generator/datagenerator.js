@@ -112,7 +112,7 @@ async function createOrUpdateWeatherInfo() {
 //http://localhost:5000/weatherInfo
 //https://web-api-cw-server-app.onrender.com/weatherInfo
 const updateWeatherInfo = async (id, updatedWeatherInfoValues) => {
-    const url = `http://localhost:5000/updateWeatherInfo/${id}`;
+    const url = `https://web-api-cw-server-app.onrender.com/updateWeatherInfo/${id}`;
 
     const options = {
         method: 'PUT',

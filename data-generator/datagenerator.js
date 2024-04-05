@@ -35,65 +35,104 @@ let districtList = [
 
 //DB Connect
 mongoose.connect('mongodb+srv://root:root@webapi.fgpmolr.mongodb.net/web-api-project?retryWrites=true&w=majority&appName=WEBAPI')
-.then(() => {
-    console.log('connected to MongoDB')
-    app.listen(8000, () => {console.log("Server started on port 8000");})
-}).catch((error) => {
-    console.log(error)
-})
+    .then(() => {
+        console.log('connected to MongoDB')
+        app.listen(1000, () => { console.log("Server started on port 1000"); })
+    }).catch((error) => {
+        console.log(error)
+    })
 
 //Insert data using function which runs every 5 minutes
-setInterval(createOrUpdateWeatherInfo, 5 * 60 * 1000);
+setInterval(createOrUpdateWeatherInfo, 5 * 1 * 1000);
 
-async function createOrUpdateWeatherInfo(){
+async function createOrUpdateWeatherInfo() {
     try {
         districtList.forEach(async district => {
             const now = new Date();
             const formattedDate = now.toLocaleString('en-US', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            hour12: true
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
             });
 
             const splittedStrings = district.split('|');
-            const IsAvailableWeatherInfo = await WeatherInfoModel.findOne({districtId: splittedStrings[0]});
+            // const IsAvailableWeatherInfo = await WeatherInfoModel.findOne({districtId: splittedStrings[0]});
 
-            if(IsAvailableWeatherInfo){
-                console.log(formattedDate.replace(',', '') + " : " + "Weather info available under district ID " + IsAvailableWeatherInfo.districtId);
-                
-                IsAvailableWeatherInfo.temprature = generateRandomTemperature() + "°C";
-                IsAvailableWeatherInfo.humidity = generateRandomHumidity() + "%";
-                IsAvailableWeatherInfo.airpressure = generateRandomAirPressure() + "hPa";
-                await IsAvailableWeatherInfo.save();
-                
-                console.log(formattedDate.replace(',', '') + " : " + IsAvailableWeatherInfo.districtId + ", " + IsAvailableWeatherInfo.districtName + " district info updated.");
-            }
-            else{
-                
-                const newWeatherInfo = new WeatherInfoModel({           
-                    
-                    districtId: splittedStrings[0],
-                    districtName: splittedStrings[1],
-                    longtude: splittedStrings[2],
-                    latitude: splittedStrings[3],
-                    temprature: generateRandomTemperature() + "°C",
-                    humidity: generateRandomHumidity() + "%",
-                    airpressure: generateRandomAirPressure() + "hPa"
-                
-                });
-                await newWeatherInfo.save();
-                console.log(splittedStrings[0] + ", " + splittedStrings[1] + " district info newly added.");
-            }    
+            // if(IsAvailableWeatherInfo){
+            //     console.log(formattedDate.replace(',', '') + " : " + "Weather info available under district ID " + IsAvailableWeatherInfo.districtId);
+
+            //     IsAvailableWeatherInfo.temprature = generateRandomTemperature() + "°C";
+            //     IsAvailableWeatherInfo.humidity = generateRandomHumidity() + "%";
+            //     IsAvailableWeatherInfo.airpressure = generateRandomAirPressure() + "hPa";
+            //     await IsAvailableWeatherInfo.save();
+
+            //     console.log(formattedDate.replace(',', '') + " : " + IsAvailableWeatherInfo.districtId + ", " + IsAvailableWeatherInfo.districtName + " district info updated.");
+            // }
+            // else{
+
+            //     const newWeatherInfo = new WeatherInfoModel({           
+
+            //         districtId: splittedStrings[0],
+            //         districtName: splittedStrings[1],
+            //         longtude: splittedStrings[2],
+            //         latitude: splittedStrings[3],
+            //         temprature: generateRandomTemperature() + "°C",
+            //         humidity: generateRandomHumidity() + "%",
+            //         airpressure: generateRandomAirPressure() + "hPa"
+
+            //     });
+            //     await newWeatherInfo.save();
+            //     console.log(splittedStrings[0] + ", " + splittedStrings[1] + " district info newly added.");
+            // } 
+
+            const id = splittedStrings[0]; // Replace with the actual district id
+            const updatedWeatherInfoValues = {
+                districtId: splittedStrings[0],
+                districtName: splittedStrings[1],
+                longtude: splittedStrings[2],
+                latitude: splittedStrings[3],
+                temprature: generateRandomTemperature() + "°C",
+                humidity: generateRandomHumidity() + "%",
+                airpressure: generateRandomAirPressure() + "hPa"
+            };
+
+            updateWeatherInfo(id, updatedWeatherInfoValues);
+
         });
         console.error('___________________________________________________');
     } catch (error) {
         console.error('Error inserting data:', error.message);
     }
 }
+
+//http://localhost:5000/weatherInfo
+//https://web-api-cw-server-app.onrender.com/weatherInfo
+const updateWeatherInfo = async (id, updatedWeatherInfoValues) => {
+    const url = `http://localhost:5000/updateWeatherInfo/${id}`;
+
+    const options = {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(updatedWeatherInfoValues)
+    };
+
+    try {
+        const response = await fetch(url, options);
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const responseData = await response.json();
+        console.log(responseData);
+    } catch (error) {
+        console.error('There was a problem with the POST request:', error);
+    }
+};
 
 function generateRandomTemperature() {
     const minTemperature = 16;
@@ -110,7 +149,7 @@ function generateRandomHumidity() {
     const maxHumidity = 90;
 
     const random = Math.random();
-    const humidity = Math.floor(random * (maxHumidity - minHumidity + 1)) + minHumidity ;
+    const humidity = Math.floor(random * (maxHumidity - minHumidity + 1)) + minHumidity;
 
     return humidity;
 }
@@ -120,7 +159,7 @@ function generateRandomAirPressure() {
     const maxAirPressure = 1020;
 
     const random = Math.random();
-    const airPressure = Math.floor(random * (maxAirPressure - minAirPressure + 1)) + minAirPressure ;
+    const airPressure = Math.floor(random * (maxAirPressure - minAirPressure + 1)) + minAirPressure;
 
     return airPressure;
 }

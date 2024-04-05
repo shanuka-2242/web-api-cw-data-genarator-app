@@ -15,6 +15,7 @@ function SriLankaMap() {
 
   useEffect(() => {
     const apiUrl = 'https://web-api-cw-server-app.onrender.com/weatherInfo';
+    //const apiUrl = 'http://localhost:5000/weatherInfo';
 
     fetch(apiUrl)
       .then(response => {
